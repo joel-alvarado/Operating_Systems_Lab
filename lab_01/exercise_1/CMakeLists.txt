@@ -8,5 +8,6 @@ include_directories(include)
 
 add_executable(exercise_1 
     src/main.c
+    src/guessing_game.c
 )
 
