@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *NumToStr(int num, char *str) {
+char *NumToStr(int num) {
   char *num_strings[] = {"zero", "one", "two",   "three", "four",
                          "five", "six", "seven", "eight", "nine"};
 

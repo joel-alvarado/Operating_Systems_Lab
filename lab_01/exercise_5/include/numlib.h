@@ -6,11 +6,10 @@
  * two eight").
  *
  * @param num
- * @param str
  *
  * @return char*
  */
-char *NumToStr(int num, char *str);
+char *NumToStr(int num);
 
 /**
  * @brief Returns the amount of digits in num.
