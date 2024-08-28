@@ -18,4 +18,12 @@
  */
 char *NumToStr(int num, char *str);
 
+/**
+ * @brief Returns the amount of digits in num.
+ *
+ * @param num
+ * @return int
+ */
+int NumLen(int num);
+
 #endif /* NUMLIB_H */

@@ -8,23 +8,18 @@ char *NumToStr(int num, char *str) {
                          "five", "six", "seven", "eight", "nine"};
 
   // Calculate length of digit
-  int digit = num;
-  int num_len = 1;
-  while (digit > 9) {
-    digit /= 10;
-    num_len++;
-  }
+  int num_len = NumLen(num);
 
   if (num_len == 1) {
-    char *new_str = malloc(sizeof(num_strings[digit]));
-    new_str = num_strings[digit];
+    char *new_str = malloc(sizeof(num_strings[num]));
+    new_str = num_strings[num];
     return new_str;
   }
 
   // Store each digit of num separately
   // Also calculate total bytes needed for the final string
   int total_bytes_needed = 0;
-  digit = num;
+  int digit = num;
   int separated_digits[num_len];
   for (int i = num_len - 1; i >= 0; i--) {
     int last_digit = digit % 10;
@@ -44,4 +39,14 @@ char *NumToStr(int num, char *str) {
     }
   }
   return new_str;
+}
+
+int NumLen(int num) {
+  int digit = num;
+  int num_len = 1;
+  while (digit > 9) {
+    digit /= 10;
+    num_len++;
+  }
+  return num_len;
 }
