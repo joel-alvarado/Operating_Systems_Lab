@@ -3,7 +3,7 @@
 #include "time_struct.h"
 
 int main() {
-  Time initial_time = TimeInit(10, 27, 34);
+  Time initial_time = TimeInitSystemTime();
   printf("Initial time: ");
   PrintTime(initial_time);
 
