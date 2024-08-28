@@ -3,6 +3,7 @@
 #include <memory.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h>
 
 Time TimeInit(int hours, int minutes, int seconds) {
   Time t;
@@ -10,6 +11,14 @@ Time TimeInit(int hours, int minutes, int seconds) {
   t.minutes = minutes;
   t.seconds = seconds;
   return t;
+}
+
+Time TimeInitSystemTime() {
+  time_t rawtime;
+  struct tm* timeinfo;
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  return TimeInit(timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 }
 
 void PrintTime(Time t) {

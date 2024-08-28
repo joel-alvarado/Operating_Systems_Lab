@@ -22,6 +22,13 @@ typedef struct {
 Time TimeInit(int hours, int minutes, int seconds);
 
 /**
+ * @brief Initalizes a Time struct with current system time.
+ *
+ * @return Time struct representation of current system time.
+ */
+Time TimeInitSystemTime();
+
+/**
  * @brief Prints Time struct t in format "00:00:00".
  *
  * @param t: Time struct
