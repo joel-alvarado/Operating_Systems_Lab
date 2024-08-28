@@ -11,7 +11,7 @@ char *NumToStr(int num, char *str) {
   int num_len = NumLen(num);
 
   if (num_len == 1) {
-    char *new_str = malloc(sizeof(num_strings[num]));
+    char *new_str = (char *)malloc(sizeof(num_strings[num]));
     new_str = num_strings[num];
     return new_str;
   }
