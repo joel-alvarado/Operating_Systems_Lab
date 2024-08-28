@@ -28,8 +28,12 @@ char *NumToStr(int num, char *str) {
     digit /= 10;
   }
 
+  // Add spaces needed between each word (1 byte per space per word, except
+  // final word)
   int spaces_needed = num_len - 1;
-  char *new_str = (char *)malloc(total_bytes_needed + spaces_needed + 1);
+  total_bytes_needed += spaces_needed;
+
+  char *new_str = (char *)malloc(total_bytes_needed + 1);
   for (int i = 0; i < num_len; i++) {
     int current_digit = separated_digits[i];
     char *verbal_digit = num_strings[current_digit];
