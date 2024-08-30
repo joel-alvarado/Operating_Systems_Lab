@@ -32,10 +32,12 @@ void AlignTextRight(char **buf);
 void AlignTextJustify(char **buf);
 
 /**
- * @brief Aligns text to the center of the margin
+ * @brief Inserts char src into dst at pos.
  *
- * @param buf
+ * @param dst
+ * @param src
+ * @param pos
  */
-void AlignTextCenter(char **buf);
+void InsertAt(char *dst, char src, int pos);
 
 #endif /* TEXT_HANDLER_H */
