@@ -14,9 +14,10 @@ void Replace(char *src, char *dst, char find, char replacement) {
 
 void Insert(char *src, char *dst, char find, char *ins) {
   strcpy(dst, src);
-  for (int i = 0; i < strlen(src); i++) {
-    if (src[i] == find) {
+  for (int i = 0; i < strlen(dst); i++) {
+    if (dst[i] == find) {
       InsertAt(dst, ins, i);
+      i += strlen(ins);
     }
   }
 }
@@ -24,13 +25,10 @@ void Insert(char *src, char *dst, char find, char *ins) {
 void ReplaceAt(char *dst, char src, int pos) { dst[pos] = src; }
 
 void InsertAt(char *dst, char *src, int pos) {
-  int dst_len = strlen(dst);
-  int src_len = strlen(src);
-  if (pos > dst_len) {
-    return;
-  }
-  char temp[src_len];
-  strcpy();
-  memmove(dst + pos + src_len, dst + pos, dst_len - pos + 1);
-  strcpy(dst + pos, src);
+  char res[strlen(dst) + strlen(src) + 1];
+  strncpy(res, dst, pos);
+  res[pos] = '\0';
+  strcat(res, src);
+  strcat(res, dst + pos);
+  strcpy(dst, res);
 }
