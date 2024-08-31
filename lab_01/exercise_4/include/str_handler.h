@@ -10,7 +10,7 @@
  * @param find: char to find
  * @param replacement: char to replace with
  */
-void Replace(char *src, char *dst, char *find, char *replacement);
+void Replace(char *src, char *dst, char find, char replacement);
 
 /**
  * @brief Searches and inserts ins into all occurences of find from src into
@@ -22,5 +22,8 @@ void Replace(char *src, char *dst, char *find, char *replacement);
  * @param ins
  */
 void Insert(char *src, char *dst, char find, char *ins);
+
+void ReplaceAt(char *dst, char src, int pos);
+void InsertAt(char *dst, char *src, int pos);
 
 #endif /* STR_HANDLER_H */

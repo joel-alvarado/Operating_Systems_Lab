@@ -8,5 +8,6 @@ include_directories(include)
 
 add_executable(exercise_4 
     src/main.c
+    src/str_handler.c
 )
 
