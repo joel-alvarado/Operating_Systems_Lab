@@ -23,7 +23,22 @@ void Replace(char *src, char *dst, char find, char replacement);
  */
 void Insert(char *src, char *dst, char find, char *ins);
 
+/**
+ * @brief Replace char src in string dst at position pos.
+ *
+ * @param dst
+ * @param src
+ * @param pos
+ */
 void ReplaceAt(char *dst, char src, int pos);
+
+/**
+ * @brief Insert string src into string dst at position pos.
+ *
+ * @param dst
+ * @param src
+ * @param pos
+ */
 void InsertAt(char *dst, char *src, int pos);
 
 #endif /* STR_HANDLER_H */

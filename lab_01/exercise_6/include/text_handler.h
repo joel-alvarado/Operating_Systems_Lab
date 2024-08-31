@@ -32,7 +32,7 @@ void AlignTextRight(char **buf);
 void AlignTextJustify(char **buf);
 
 /**
- * @brief Inserts char src into dst at pos.
+ * @brief Inserts char src into string dst at position pos.
  *
  * @param dst
  * @param src
