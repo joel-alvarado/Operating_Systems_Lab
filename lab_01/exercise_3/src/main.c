@@ -8,6 +8,5 @@ int main() {
   fill_deck(deck);
   fill_hand(hand, deck);
   PrintDeck(hand, 5);
-  PrintDeck(deck, 52);
   AnalyzePokerHand(hand);
 }
