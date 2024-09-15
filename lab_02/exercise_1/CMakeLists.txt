@@ -11,7 +11,7 @@ add_executable(greetings
     src/greetlib.c
 )
 
-add_executable(fork_maker
+add_executable(exercise_1
     src/fork_maker.c
     src/child_creator.c
 )
