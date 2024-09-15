@@ -14,26 +14,26 @@ int main() {
   int msgid;
   struct message msg;
 
-  // Generate unique key for the message queue
+  // Register unique key for message queue
   key = ftok("msgq_write_numbers", 24);
   if (key == -1) {
     perror("ftok error");
     exit(EXIT_FAILURE);
   }
 
-  // Create or get the message queue
+  // Read or create message queue
   msgid = msgget(key, 0666 | IPC_CREAT);
   if (msgid == -1) {
     perror("msgget failed");
     exit(EXIT_FAILURE);
   }
 
+  // Run write numbers to send numbers as messages
   int pid_writer = fork();
   if (pid_writer == -1) {
     perror("fork failed");
     exit(EXIT_FAILURE);
   }
-
   if (pid_writer == 0) {
     char *args[] = {"./msgq_write_numbers", NULL};
     if (execvp(args[0], args) == -1) {
@@ -42,24 +42,24 @@ int main() {
     }
   }
 
+  // Recieve message of initial time
   struct time t;
   if (msgrcv(msgid, &t, sizeof(t.start), 2, 0) == -1) {
     perror("msgrcv failed");
     exit(EXIT_FAILURE);
   }
 
+  // Recieve 1000 numbers and add them to total
   long total = 0;
-  int local_numbers[SUM_SIZE];
   for (int i = 0; i < SUM_SIZE; i += 1000) {
     // Send 1000 elements at a time
     if (msgrcv(msgid, &msg, sizeof(msg.marray), 1, 0) == -1) {
       perror("msgrcv failed");
       exit(EXIT_FAILURE);
     }
-    memcpy(&local_numbers[i], msg.marray, 1000 * sizeof(int));
-  }
-  for (int i = 0; i < SUM_SIZE; i++) {
-    total += local_numbers[i];
+    for (int j = 0; j < 1000; j++) {
+      total += msg.marray[j];
+    }
   }
 
   // Finish timing

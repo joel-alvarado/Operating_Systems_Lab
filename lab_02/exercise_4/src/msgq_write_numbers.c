@@ -14,14 +14,14 @@ int main() {
   struct message msg;
   struct time t;
 
-  // Generate unique key for the message queue
+  // Register unique key for message queue
   key = ftok("msgq_write_numbers", 24);
   if (key == -1) {
     perror("ftok error");
     exit(EXIT_FAILURE);
   }
 
-  // Create or get the message queue
+  // Read or create message queue
   msgid = msgget(key, 0666 | IPC_CREAT);
   if (msgid == -1) {
     perror("msgget failed");
