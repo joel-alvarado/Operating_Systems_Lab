@@ -7,6 +7,7 @@
 
 int main() {
   printf("UNIX Message Queues vs Shared Memory Demo\n");
+  printf("\n");
 
   printf("Shared Memory:\n");
   int pid_adder_shm = fork();
@@ -18,8 +19,9 @@ int main() {
     }
   }
   waitpid(pid_adder_shm, NULL, 0);
+  printf("\n");
 
-  printf("Message Queues:\n");
+  printf("Message Queues (each message contains 1000 numbers):\n");
   int pid_adder_msgq = fork();
   if (pid_adder_msgq == 0) {
     char* args[] = {"./msgq_sum_numbers", NULL};
