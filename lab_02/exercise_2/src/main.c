@@ -96,6 +96,11 @@ int main() {
         continue;
       }
 
+      // This allows exit to work
+      if (strcmp(args[0], "exit") == 0) {
+        exit(0);
+      }
+
       // Execute the command through fork and execvp
       int p = fork();
       if (p == 0) {
