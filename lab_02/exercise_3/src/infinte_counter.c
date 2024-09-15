@@ -3,25 +3,32 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-// Custom handler for SIGUSR1
-void handle_sigusr1(int sig) { printf("Received SIGUSR1 signal: %d\n", sig); }
+#include "infinite_counter.h"
 
-// Custom handler for SIGUSR2
-void handle_sigusr2(int sig) { printf("Received SIGUSR2 signal: %d\n", sig); }
+void handle_sigusr1(int sig) {
+  printf("Process %d: Resetting...\n", getpid());
+  total = 0;
+}
 
-// Custom handler for SIGINT
-void handle_sigint(int sig) { exit(1); }
+void handle_sigusr2(int sig) {
+  printf("Process %d: Reversing...\n", getpid());
+  step *= -1;
+}
+
+void handle_sigterm(int sig) {
+  printf("Process %d: Terminating...\n", getpid());
+  exit(0);
+}
 
 int main() {
   signal(SIGUSR1, handle_sigusr1);
-  signal(SIGUSR1, handle_sigusr2);
-  signal(SIGINT, handle_sigint);
-
-  // Infinite loop to keep the process alive to receive signals
+  signal(SIGUSR2, handle_sigusr2);
+  signal(SIGTERM, handle_sigterm);
   while (1) {
-    printf("Waiting for signals...\n");
-    sleep(5);
+    printf("Process %d: I’m counting, and my count is %d...\n", getpid(),
+           total);
+    total += step;
+    sleep(1);
   }
-
   return 0;
 }
