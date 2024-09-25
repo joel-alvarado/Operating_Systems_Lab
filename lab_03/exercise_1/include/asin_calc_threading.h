@@ -10,14 +10,7 @@
  * below.
  *
  */
-typedef struct s_user_locks {
-  pthread_mutex_t user_input_lock;
-  pthread_mutex_t exit_lock;
-  pthread_cond_t new_input_cond;
-  pthread_cond_t exit_cond;
-  int exit;
-  float user_input;
-} t_user_locks;
+typedef struct sUserLocks tUserLocks;
 
 /**
  * @brief Thread routine that reads user input and signals a cond for arcsin
@@ -26,7 +19,7 @@ typedef struct s_user_locks {
  * @param data
  * @return void*
  */
-void *user_input_thread_routine(void *data);
+void *userInputThreadRoutine(void *data);
 
 /**
  * @brief If data->user_input is 0 >= x <= 1, the thread will calculate arcsin.
@@ -36,6 +29,14 @@ void *user_input_thread_routine(void *data);
  * @param data
  * @return void*
  */
-void *arcsin_calc_thread_routine(void *data);
+void *arcsinCalcThreadRoutine(void *data);
+
+/**
+ * @brief Launches the main arcsin calculator program. Will launch threads
+ * asking for user input & calculating the arcsin of the user's number.
+ * If input > 100 the program exits.
+ *
+ */
+void launchAsinCalculator();
 
 #endif /* ASIN_CALC_THREADING_H */
