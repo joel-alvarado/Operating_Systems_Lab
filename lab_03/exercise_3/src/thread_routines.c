@@ -54,6 +54,26 @@ void *writeRandomIntegers(void *data) {
 
 void *readIntoInputBuffer(void *data) {
   tThreadData *thread_data = (tThreadData *)data;
+  FILE *file = fopen(thread_data->file_name, "r");
+
+  if (file == NULL) {
+    perror("fopen");
+    pthread_exit((void *)EXIT_FAILURE);
+  }
+
+  for (int i = 0; i < thread_data->input_buffer_size; i++) {
+    // Lock and read 1 value into input buffer
+    pthread_mutex_lock(&thread_data->input_buffer_lock);
+    fscanf(file, "%d", &thread_data->input_buffer[i]);
+    pthread_mutex_unlock(&thread_data->input_buffer_lock);
+
+    // Lock and update last read value
+    pthread_mutex_lock(&thread_data->n_read_values_lock);
+    thread_data->n_read_values++;
+    pthread_cond_signal(&thread_data->start_sqrt_thread);
+    pthread_mutex_unlock(&thread_data->n_read_values_lock);
+  }
+  pthread_exit(EXIT_SUCCESS);
 }
 
 void *calculateSquareRoot(void *data) {
