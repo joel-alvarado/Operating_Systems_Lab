@@ -83,7 +83,7 @@ void startThreads() {
 
   // Processed buffer stuff
   int processed_buffer_size = input_buffer_size;
-  int *processed_buffer = (int *)malloc(processed_buffer_size * sizeof(int));
+  double *processed_buffer = (int *)malloc(processed_buffer_size * sizeof(int));
   thread_data.processed_buffer = processed_buffer;
   thread_data.processed_buffer_size = processed_buffer_size;
   thread_data.n_processed_values = 0;
