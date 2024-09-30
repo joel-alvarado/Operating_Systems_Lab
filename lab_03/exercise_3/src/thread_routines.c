@@ -10,6 +10,7 @@
 
 typedef struct sThreadData {
   char *file_name;
+  char *output_file_name;
   int *input_buffer;
   size_t input_buffer_size;
   int n_read_values;
@@ -82,6 +83,8 @@ void *readIntoInputBuffer(void *data) {
   thread_data->all_data_read = true;
   pthread_cond_signal(&thread_data->start_sqrt_thread);
   pthread_mutex_unlock(&thread_data->n_read_values_lock);
+
+  printf("Done reading data from '%s'.\n", thread_data->file_name);
   pthread_exit(EXIT_SUCCESS);
 }
 
@@ -127,23 +130,66 @@ void *calculateSquareRoot(void *data) {
       pthread_mutex_unlock(&thread_data->n_processed_values_lock);
     }
 
-    // Exit if the last value has been processed
+    // Exit if all data read and processed
     pthread_mutex_lock(&thread_data->n_read_values_lock);
     if (thread_data->all_data_read &&
         last_n_processed_values >= thread_data->n_read_values) {
+      thread_data->all_data_processed = true;
       pthread_mutex_unlock(&thread_data->n_read_values_lock);
-      break;  // Break the loop after processing the last value
+      break;
     }
     pthread_mutex_unlock(&thread_data->n_read_values_lock);
   }
 
+  printf("Done calculating square roots.\n");
   pthread_exit((void *)EXIT_SUCCESS);  // Gracefully exit the thread
 }
 
 void *writeProcessedBuffer(void *data) {
   tThreadData *thread_data = (tThreadData *)data;
+  FILE *file = fopen(thread_data->output_file_name, "w");
 
-  // MISSING CODE HERE
+  if (file == NULL) {
+    perror("fopen");
+    pthread_exit((void *)EXIT_FAILURE);
+  }
+
+  int written_values = 0;
+  while (1) {
+    // Wait for new processed data to be available
+    pthread_mutex_lock(&thread_data->n_processed_values_lock);
+    while (thread_data->n_processed_values == written_values &&
+           !thread_data->all_data_processed) {
+      pthread_cond_wait(&thread_data->start_write_processed_buffer,
+                        &thread_data->n_processed_values_lock);
+    }
+    int last_n_processed_values = thread_data->n_processed_values;
+    pthread_mutex_unlock(&thread_data->n_processed_values_lock);
+
+    // If there are new values to write
+    if (written_values <= last_n_processed_values) {
+      for (int i = written_values; i < last_n_processed_values; i++) {
+        fprintf(file, "%.2f", thread_data->processed_buffer[i]);
+        if (written_values != thread_data->processed_buffer_size - 1)
+          fprintf(file, "\n");
+        written_values++;
+      }
+      pthread_mutex_unlock(&thread_data->processed_buffer_lock);
+    }
+
+    // Exit if the last value has finished processing
+    pthread_mutex_lock(&thread_data->n_processed_values_lock);
+    if (thread_data->all_data_processed &&
+        written_values >= thread_data->n_processed_values) {
+      pthread_mutex_unlock(&thread_data->n_processed_values_lock);
+      break;  // Break the loop after writing the last value
+    }
+    pthread_mutex_unlock(&thread_data->n_processed_values_lock);
+  }
+
+  printf("Done writing processed data to '%s'.\n",
+         thread_data->output_file_name);
+  pthread_exit((void *)EXIT_SUCCESS);
 }
 
 void startThreads() {
@@ -152,7 +198,9 @@ void startThreads() {
 
   // File name stuff
   char *file_name = "data.txt";
+  char *output_file_name = "processed.txt";
   thread_data.file_name = file_name;
+  thread_data.output_file_name = output_file_name;
 
   // Input buffer stuff
   int input_buffer_size = 10000;
@@ -201,8 +249,4 @@ void startThreads() {
   pthread_join(read_into_input_buffer_thread_id, NULL);
   pthread_join(calculate_square_root_thread_id, NULL);
   pthread_join(write_processed_buffer_thread_id, NULL);
-
-  for (int i = 0; i < input_buffer_size; i++) {
-    printf("%.2f\n", thread_data.processed_buffer[i]);
-  }
 }
