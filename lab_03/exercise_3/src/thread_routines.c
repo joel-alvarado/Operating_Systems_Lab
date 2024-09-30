@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
+#include <time.h>
 
 typedef struct sThreadData {
   char *file_name;
@@ -31,6 +31,10 @@ typedef struct sThreadData {
 } tThreadData;
 
 void *writeRandomIntegers(void *data) {
+  // Timing the thread (time taken to exec)
+  struct timespec start_time, end_time;
+  clock_gettime(CLOCK_MONOTONIC, &start_time);
+
   int thread_exit_status;
   tThreadData *thread_data = (tThreadData *)data;
   FILE *file = fopen(thread_data->file_name, "r");
@@ -49,16 +53,23 @@ void *writeRandomIntegers(void *data) {
     }
     fclose(file);
     thread_exit_status = 0;
-    printf("File '%s' created and random numbers written successfully.\n",
-           thread_data->file_name);
   } else {
     thread_exit_status = 1;
     printf("Error: File '%s' already exists.\n", thread_data->file_name);
   }
+
+  // Record the end time and calc time taken
+  clock_gettime(CLOCK_MONOTONIC, &end_time);
+  double time_taken = calculateTimeDifference(&start_time, &end_time);
+  printf("Thread writeRandomIntegers completed in %f seconds\n", time_taken);
   pthread_exit(&thread_exit_status);
 }
 
 void *readIntoInputBuffer(void *data) {
+  // Timing the thread (time taken to exec)
+  struct timespec start_time, end_time;
+  clock_gettime(CLOCK_MONOTONIC, &start_time);
+
   tThreadData *thread_data = (tThreadData *)data;
   FILE *file = fopen(thread_data->file_name, "r");
 
@@ -84,11 +95,18 @@ void *readIntoInputBuffer(void *data) {
   pthread_cond_signal(&thread_data->start_sqrt_thread);
   pthread_mutex_unlock(&thread_data->n_read_values_lock);
 
-  printf("Done reading data from '%s'.\n", thread_data->file_name);
-  pthread_exit(EXIT_SUCCESS);
+  // Record the end time and calc time taken
+  clock_gettime(CLOCK_MONOTONIC, &end_time);
+  double time_taken = calculateTimeDifference(&start_time, &end_time);
+  printf("Thread readIntoInputBuffer completed in %f seconds\n", time_taken);
+  pthread_exit((void *)EXIT_SUCCESS);
 }
 
 void *calculateSquareRoot(void *data) {
+  // Timing the thread (time taken to exec)
+  struct timespec start_time, end_time;
+  clock_gettime(CLOCK_MONOTONIC, &start_time);
+
   tThreadData *thread_data = (tThreadData *)data;
 
   while (1) {
@@ -141,11 +159,18 @@ void *calculateSquareRoot(void *data) {
     pthread_mutex_unlock(&thread_data->n_read_values_lock);
   }
 
-  printf("Done calculating square roots.\n");
-  pthread_exit((void *)EXIT_SUCCESS);  // Gracefully exit the thread
+  // Record the end time and calc time taken
+  clock_gettime(CLOCK_MONOTONIC, &end_time);
+  double time_taken = calculateTimeDifference(&start_time, &end_time);
+  printf("Thread calculateSquareRoot completed in %f seconds\n", time_taken);
+  pthread_exit((void *)EXIT_SUCCESS);
 }
 
 void *writeProcessedBuffer(void *data) {
+  // Timing the thread (time taken to exec)
+  struct timespec start_time, end_time;
+  clock_gettime(CLOCK_MONOTONIC, &start_time);
+
   tThreadData *thread_data = (tThreadData *)data;
   FILE *file = fopen(thread_data->output_file_name, "w");
 
@@ -187,8 +212,10 @@ void *writeProcessedBuffer(void *data) {
     pthread_mutex_unlock(&thread_data->n_processed_values_lock);
   }
 
-  printf("Done writing processed data to '%s'.\n",
-         thread_data->output_file_name);
+  // Record the end time and calc time taken
+  clock_gettime(CLOCK_MONOTONIC, &end_time);
+  double time_taken = calculateTimeDifference(&start_time, &end_time);
+  printf("Thread writeProcessedBuffer completed in %f seconds\n", time_taken);
   pthread_exit((void *)EXIT_SUCCESS);
 }
 
@@ -249,4 +276,10 @@ void startThreads() {
   pthread_join(read_into_input_buffer_thread_id, NULL);
   pthread_join(calculate_square_root_thread_id, NULL);
   pthread_join(write_processed_buffer_thread_id, NULL);
+}
+
+double calculateTimeDifference(struct timespec *start, struct timespec *end) {
+  double start_sec = (double)start->tv_sec + (double)start->tv_nsec / 1e9;
+  double end_sec = (double)end->tv_sec + (double)end->tv_nsec / 1e9;
+  return end_sec - start_sec;
 }

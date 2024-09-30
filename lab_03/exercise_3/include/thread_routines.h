@@ -56,6 +56,23 @@ void *calculateSquareRoot(void *data);
  * @return void*
  */
 void *writeProcessedBuffer(void *data);
+
+/**
+ * @brief Launches the main program. Will launch a thread with
+ * `writeRandomIntegers`. Then launches 3 separate threads from
+ * `readIntoInputBuffer`, `calculateSquareRoot` & `writeProcessedBuffer`. Waits
+ * for these threads to be finished
+ *
+ */
 void startThreads();
+
+/**
+ * @brief Helper function to calculate difference between 2 `timespec` structs
+ *
+ * @param start
+ * @param end
+ * @return double
+ */
+double calculateTimeDifference(struct timespec *start, struct timespec *end);
 
 #endif /* THREAD_ROUTINES_H */
