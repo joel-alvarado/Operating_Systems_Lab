@@ -2,8 +2,10 @@
 
 #include <math.h>
 #include <pthread.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
 
 typedef struct sThreadData {
@@ -22,6 +24,9 @@ typedef struct sThreadData {
 
   pthread_cond_t start_sqrt_thread;
   pthread_cond_t start_write_processed_buffer;
+
+  bool all_data_read;
+  bool all_data_processed;
 } tThreadData;
 
 void *writeRandomIntegers(void *data) {
@@ -73,15 +78,72 @@ void *readIntoInputBuffer(void *data) {
     pthread_cond_signal(&thread_data->start_sqrt_thread);
     pthread_mutex_unlock(&thread_data->n_read_values_lock);
   }
+  pthread_mutex_lock(&thread_data->n_read_values_lock);
+  thread_data->all_data_read = true;
+  pthread_cond_signal(&thread_data->start_sqrt_thread);
+  pthread_mutex_unlock(&thread_data->n_read_values_lock);
   pthread_exit(EXIT_SUCCESS);
 }
 
 void *calculateSquareRoot(void *data) {
   tThreadData *thread_data = (tThreadData *)data;
+
+  while (1) {
+    // Lock n_processed_values to get the latest number of processed values
+    pthread_mutex_lock(&thread_data->n_processed_values_lock);
+    int last_n_processed_values = thread_data->n_processed_values;
+    pthread_mutex_unlock(&thread_data->n_processed_values_lock);
+
+    // Wait for new data to be available
+    pthread_mutex_lock(&thread_data->n_read_values_lock);
+    while (thread_data->n_read_values == last_n_processed_values &&
+           !thread_data->all_data_read) {
+      pthread_cond_wait(&thread_data->start_sqrt_thread,
+                        &thread_data->n_read_values_lock);
+    }
+    int last_n_read_values = thread_data->n_read_values;
+    pthread_mutex_unlock(&thread_data->n_read_values_lock);
+
+    // If there are new values to process
+    if (last_n_read_values > last_n_processed_values) {
+      // Lock the processed buffer and perform the square root
+      pthread_mutex_lock(&thread_data->processed_buffer_lock);
+      int i;
+      for (i = last_n_processed_values; i < last_n_read_values; i++) {
+        float r = thread_data->input_buffer[i];
+        float y = r / 2;
+        for (int j = 0; j < 10; j++) {
+          y = 0.5 * (y + r / y);
+        }
+        thread_data->processed_buffer[i] = y;
+      }
+      pthread_mutex_unlock(&thread_data->processed_buffer_lock);
+
+      // Lock n_processed_values and update the count of processed values
+      pthread_mutex_lock(&thread_data->n_processed_values_lock);
+      thread_data->n_processed_values = i;
+      pthread_cond_signal(
+          &thread_data->start_write_processed_buffer);  // Signal writer thread
+      pthread_mutex_unlock(&thread_data->n_processed_values_lock);
+    }
+
+    // Exit if the last value has been processed
+    pthread_mutex_lock(&thread_data->n_read_values_lock);
+    if (thread_data->all_data_read &&
+        last_n_processed_values >= thread_data->n_read_values) {
+      pthread_mutex_unlock(&thread_data->n_read_values_lock);
+      break;  // Break the loop after processing the last value
+    }
+    pthread_mutex_unlock(&thread_data->n_read_values_lock);
+  }
+
+  pthread_exit((void *)EXIT_SUCCESS);  // Gracefully exit the thread
 }
 
 void *writeProcessedBuffer(void *data) {
   tThreadData *thread_data = (tThreadData *)data;
+
+  // MISSING CODE HERE
 }
 
 void startThreads() {
@@ -115,6 +177,8 @@ void startThreads() {
   // output thread
   pthread_cond_init(&thread_data.start_sqrt_thread, NULL);
   pthread_cond_init(&thread_data.start_write_processed_buffer, NULL);
+  thread_data.all_data_read = false;
+  thread_data.all_data_processed = false;
 
   // Launch writer thread
   pthread_t writer_thread_id;
@@ -137,4 +201,8 @@ void startThreads() {
   pthread_join(read_into_input_buffer_thread_id, NULL);
   pthread_join(calculate_square_root_thread_id, NULL);
   pthread_join(write_processed_buffer_thread_id, NULL);
+
+  for (int i = 0; i < input_buffer_size; i++) {
+    printf("%.2f\n", thread_data.processed_buffer[i]);
+  }
 }
