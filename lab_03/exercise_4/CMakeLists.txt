@@ -4,7 +4,9 @@ project(bouncing_ball)
 include_directories(include)
 
 add_executable(${CMAKE_PROJECT_NAME} 
-    src/main.c)
+    src/main.c
+    src/ball.c
+)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
     ncurses)
