@@ -8,7 +8,7 @@
  * not found, fork execute the imu_driver process.
  *
  */
-void StartIMUSupervisor();
+void StartSupervisor(char *process_name);
 
 /**
  * @brief Get the PID from a process name.
@@ -20,7 +20,7 @@ pid_t GetPidByName(const char *process_name);
 
 /**
  * @brief Checks if imu_driver is running. If not, calls
- * `StartNewIMUDriverProcess`.
+ * `StartNewSupervisedProcess`.
  *
  * @param signum Signal number recieved (SIGUSR1 from timer).
  */
@@ -31,7 +31,7 @@ void CheckAndRestartIMUDriver(int signum);
  *
  * @return pid_t PID of the new `imu_driver` process.
  */
-pid_t StartNewIMUDriverProcess();
+pid_t StartNewSupervisedProcess();
 
 /**
  * @brief Handles `SIGTERM` signal to exit gracefully.

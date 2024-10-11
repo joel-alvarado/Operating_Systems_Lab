@@ -15,9 +15,13 @@ typedef struct sigaction sigaction_t;
 typedef struct sigevent sigevent_t;
 typedef struct itimerspec itimerspec_t;
 
-pid_t latest_imu_driver_pid;
+pid_t latest_supervised_pid;
+char *supervised_process_name;
 
-void StartIMUSupervisor() {
+void StartSupervisor(char *process_name) {
+  // Set up supervised process
+  supervised_process_name = process_name;
+
   // Set up signal handler
   sigaction_t sig_action;
   sig_action.sa_flags = SA_SIGINFO;
@@ -51,14 +55,31 @@ void StartIMUSupervisor() {
   }
 
   while (1) {
-    waitpid(latest_imu_driver_pid, NULL, 0);
+    waitpid(latest_supervised_pid, NULL, 0);
     usleep(100 * 1000);
   }
 }
 
 pid_t GetPidByName(const char *process_name) {
+  char *parsed_processed_name = malloc(strlen(process_name) * sizeof(char) + 1);
+  strcpy(parsed_processed_name, process_name);
+
+  // Handle relative path
+  if (process_name[0] == '.' && process_name[1] == '/') {
+    memcpy(parsed_processed_name, &parsed_processed_name[2],
+           strlen(process_name) - 2);
+    parsed_processed_name[strlen(process_name) - 2] = '\0';
+  }
+
+  // Handle absolute path
+  if (process_name[0] == '/') {
+    memcpy(parsed_processed_name, &parsed_processed_name[1],
+           strlen(process_name) - 1);
+    parsed_processed_name[strlen(process_name) - 1] = '\0';
+  }
+
   char command[256];
-  snprintf(command, sizeof(command), "pgrep -x %s", process_name);
+  snprintf(command, sizeof(command), "pgrep -x %s", parsed_processed_name);
   FILE *fp = popen(command, "r");
   if (fp == NULL) {
     perror("popen");
@@ -73,18 +94,17 @@ pid_t GetPidByName(const char *process_name) {
 }
 
 void CheckAndRestartIMUDriver(int signum) {
-  char *imu_process_name = "imu_driver";
-  pid_t imu_process_pid = GetPidByName(imu_process_name);
+  pid_t process_pid = GetPidByName(supervised_process_name);
 
-  if (imu_process_pid == -1) {
-    latest_imu_driver_pid = StartNewIMUDriverProcess();
+  if (process_pid == -1) {
+    latest_supervised_pid = StartNewSupervisedProcess();
   }
 }
 
-pid_t StartNewIMUDriverProcess() {
+pid_t StartNewSupervisedProcess() {
   pid_t pid = fork();
   if (pid == 0) {
-    char *args[] = {"./imu_driver", NULL};
+    char *args[] = {supervised_process_name, NULL};
     execvp(args[0], args);
   }
   return pid;
