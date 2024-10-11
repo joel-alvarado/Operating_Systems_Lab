@@ -27,6 +27,7 @@ typedef struct sMotionSensorInfo {
 
 struct timespec last_update_time;
 MotionSensorInfo *info;
+timer_t timer_id;
 
 void StartIMUDriver() {
   signal(SIGTERM, HandleSIGTERM);
@@ -54,7 +55,6 @@ void StartIMUDriver() {
 
   // Create the timer
   sigevent_t sig_event;
-  timer_t timer_id;
   sig_event.sigev_notify = SIGEV_SIGNAL;
   sig_event.sigev_signo = SIGALRM;
   sig_event.sigev_value.sival_ptr = &timer_id;
@@ -193,4 +193,7 @@ MotionSensorInfo *GetDefaultSensorData() {
   return info;
 }
 
-void HandleSIGTERM(int signum) { exit(1); }
+void HandleSIGTERM(int signum) {
+  timer_delete(timer_id);
+  exit(1);
+}
