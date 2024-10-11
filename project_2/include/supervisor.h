@@ -40,4 +40,4 @@ pid_t StartNewSupervisedProcess();
  */
 void HandleSIGTERM(int signum);
 
-#endif
+#endif /* IMU_DRIVER_INCLUDE_SUPERVISOR_H */
