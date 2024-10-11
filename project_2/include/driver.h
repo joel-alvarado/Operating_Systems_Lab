@@ -36,7 +36,8 @@ void UpdateSensorInfo();
 /**
  * @brief Reads latest sensor info from "data.txt".
  *
- * @return `MotionSensorInfo*` with latest data read from "data.txt"
+ * @return `MotionSensorInfo*` with latest data read from "data.txt" NOTE: The
+ * caller is responsible for freeing the pointer after use.
  */
 MotionSensorInfo *ReadLatestSensorData();
 
@@ -49,9 +50,10 @@ MotionSensorInfo *ReadLatestSensorData();
  * v_y = 0,
  * acc_x = 0.15,
  * acc_y = 0.06
- * NOTE: The caller is responsible for freeing the pointer after use.
  *
- * @return `MotionSensorInfo*` with default values.
+ *
+ * @return `MotionSensorInfo*` with default values. NOTE: The caller is
+ * responsible for freeing the pointer after use.
  */
 MotionSensorInfo *GetDefaultSensorData();
 
