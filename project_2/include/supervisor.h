@@ -24,7 +24,7 @@ pid_t GetPidByName(const char *process_name);
  *
  * @param signum Signal number recieved (SIGUSR1 from timer).
  */
-void CheckAndRestartIMUDriver(int signum);
+void CheckAndRestartProcess(int signum);
 
 /**
  * @brief Fork-executes a new `process_name` process.

@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <wait.h>
 
+// Typedefd to avoid having to write struct
 typedef struct sigaction sigaction_t;
 typedef struct sigevent sigevent_t;
 typedef struct itimerspec itimerspec_t;
@@ -22,10 +23,10 @@ void StartSupervisor(char *process_name) {
   // Set up supervised process
   supervised_process_name = process_name;
 
-  // Set up signal handler
+  // Set up signal handler to check & restart process
   sigaction_t sig_action;
   sig_action.sa_flags = SA_SIGINFO;
-  sig_action.sa_handler = CheckAndRestartIMUDriver;
+  sig_action.sa_handler = CheckAndRestartProcess;
   sigemptyset(&sig_action.sa_mask);
   if (sigaction(SIGUSR1, &sig_action, NULL) == -1) {
     perror("sigaction");
@@ -93,7 +94,7 @@ pid_t GetPidByName(const char *process_name) {
   return pid;
 }
 
-void CheckAndRestartIMUDriver(int signum) {
+void CheckAndRestartProcess(int signum) {
   pid_t process_pid = GetPidByName(supervised_process_name);
 
   if (process_pid == -1) {

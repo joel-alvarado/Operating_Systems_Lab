@@ -2,7 +2,6 @@
 
 #define _GNU_SOURCE
 
-#include <bits/types/timer_t.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
