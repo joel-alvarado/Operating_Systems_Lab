@@ -4,8 +4,8 @@
 #include <aio.h>
 
 /**
- * @brief Starts supervisor process. Looks for a PID related to `imu_driver`. If
- * not found, fork execute the imu_driver process.
+ * @brief Starts supervisor process. Looks for a PID related to `process_name`.
+ * If not found, fork execute `process_name`.
  *
  */
 void StartSupervisor(char *process_name);
@@ -19,7 +19,7 @@ void StartSupervisor(char *process_name);
 pid_t GetPidByName(const char *process_name);
 
 /**
- * @brief Checks if imu_driver is running. If not, calls
+ * @brief Checks if `process_name` is running. If not, calls
  * `StartNewSupervisedProcess`.
  *
  * @param signum Signal number recieved (SIGUSR1 from timer).
@@ -27,9 +27,9 @@ pid_t GetPidByName(const char *process_name);
 void CheckAndRestartIMUDriver(int signum);
 
 /**
- * @brief Fork-executes a new `imu_driver` process.
+ * @brief Fork-executes a new `process_name` process.
  *
- * @return pid_t PID of the new `imu_driver` process.
+ * @return pid_t PID of the new `process_name` process.
  */
 pid_t StartNewSupervisedProcess();
 

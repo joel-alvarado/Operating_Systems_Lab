@@ -70,4 +70,4 @@ MotionSensorInfo *GetDefaultSensorData();
  */
 void HandleSIGTERM(int signum);
 
-#endif  // IMU_DRIVER_INCLUDE_DRIVER_H
+#endif /* IMU_DRIVER_INCLUDE_DRIVER_H */
