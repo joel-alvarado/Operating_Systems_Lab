@@ -16,28 +16,22 @@
 typedef struct sMotionSensorInfo MotionSensorInfo;
 
 /**
- * @brief Starts the IMUDriver program.
+ * @brief Starts the IMUDriver program. Sets a timer of 200ms to write current
+ * MotionSensorInfo to `'data.txt'`. If `'data.txt'` already exists, latest
+ * recorded values are loaded using `ReadLatestSensorData`. Else,
+ * `GetDefaultSensorData` is used.
  *
  */
 void StartIMUDriver();
 
-/**
- * @brief Thread routine. Writes current `MotionSensorInfo` data to
- * `imu_data.txt`.
- *
- * @param sensor_info `void *` to an instance of `MotionSensorInfo`
- * @return `void *` to the thread's exit status.
- */
-void *WriteDataRoutine(void *sensor_info);
+void SaveSensorData(int signum);
 
 /**
- * @brief Updates `sensor_info`. Increases time ellapsed by 200ms, and updates
- * position and velocity according to acceleration values.
+ * @brief Calls `UpdateSensorInfo` with current sensor data and writes the
+ * updated values to `'data.txt'`.
  *
- * @param sensor_info `MotionSensorInfo *` containing sensor information to
- * update.
  */
-void UpdateSensorInfo(MotionSensorInfo *sensor_info);
+void UpdateSensorInfo();
 
 /**
  * @brief Reads latest sensor info from "data.txt".
@@ -57,8 +51,15 @@ MotionSensorInfo *ReadLatestSensorData();
  * acc_y = 0.06
  * NOTE: The caller is responsible for freeing the pointer after use.
  *
- * @return `MotionSensorInfo*` with default values read from "data.txt"
+ * @return `MotionSensorInfo*` with default values.
  */
 MotionSensorInfo *GetDefaultSensorData();
+
+/**
+ * @brief Exits gracefully.
+ *
+ * @param signum Signal number recieved (15).
+ */
+void HandleSIGTERM(int signum);
 
 #endif  // IMU_DRIVER_INCLUDE_DRIVER_H

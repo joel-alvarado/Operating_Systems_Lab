@@ -7,7 +7,12 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -s")
 include_directories(include)
 
 add_executable(${CMAKE_PROJECT_NAME} 
-    src/main.c
+    src/start_driver.c
     src/driver.c
+)
+
+add_executable(supervisor
+    src/start_supervisor.c
+    src/supervisor.c
 )
 
