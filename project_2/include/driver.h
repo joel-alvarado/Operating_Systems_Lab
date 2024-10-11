@@ -58,7 +58,7 @@ MotionSensorInfo *ReadLatestSensorData();
 MotionSensorInfo *GetDefaultSensorData();
 
 /**
- * @brief Exits gracefully.
+ * @brief Exits gracefully, cleans up timer.
  *
  * @param signum Signal number recieved (15).
  */
