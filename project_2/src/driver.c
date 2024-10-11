@@ -11,10 +11,10 @@
 #include <time.h>
 #include <unistd.h>
 
+// Typedefd to avoid having to write struct
 typedef struct sigaction sigaction_t;
 typedef struct sigevent sigevent_t;
 typedef struct itimerspec itimerspec_t;
-
 typedef struct sMotionSensorInfo {
   double time_elapsed;
   double p_x;
@@ -25,12 +25,16 @@ typedef struct sMotionSensorInfo {
   double acc_y;
 } MotionSensorInfo;
 
+// Global access for signal handlers
 struct timespec last_update_time;
 MotionSensorInfo *info;
 timer_t timer_id;
 
 void StartIMUDriver() {
+  // Register SIGTERM to exit cleanly
   signal(SIGTERM, HandleSIGTERM);
+
+  // Log current starting time
   clock_gettime(CLOCK_REALTIME, &last_update_time);
 
   // Makes sure if data exists, load that instead
@@ -43,7 +47,7 @@ void StartIMUDriver() {
     info = GetDefaultSensorData();
   }
 
-  // Set up signal handler
+  // Set up signal handler to save sensor data on timer expire
   sigaction_t sig_action;
   sig_action.sa_flags = SA_SIGINFO;
   sig_action.sa_handler = SaveSensorData;  // Specify the function to call
@@ -83,7 +87,9 @@ void StartIMUDriver() {
 
 void SaveSensorData(int signum) {
   printf("PID %d writing to data.txt...\n", getpid());
+
   UpdateSensorInfo();
+  // Open data.txt to write updated sensor info.
   FILE *f = fopen("data.txt", "a");
   if (!f) {
     perror("Error opening file for writing");
@@ -92,7 +98,7 @@ void SaveSensorData(int signum) {
 
   fprintf(f, "%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f\n", info->time_elapsed,
           info->p_x, info->p_y, info->v_x, info->v_y, info->acc_x, info->acc_y);
-  fflush(f);
+  fflush(f);  // Flush buffer
   fclose(f);
 }
 
@@ -112,7 +118,7 @@ void UpdateSensorInfo() {
   // Accumulate the total elapsed time
   info->time_elapsed += elapsed_since_last_update;
 
-  // Update velocity using the time delta (not the total elapsed time)
+  // Update velocity using the time delta
   info->v_x += info->acc_x * elapsed_since_last_update;
   info->v_y += info->acc_y * elapsed_since_last_update;
 
@@ -194,6 +200,6 @@ MotionSensorInfo *GetDefaultSensorData() {
 }
 
 void HandleSIGTERM(int signum) {
-  timer_delete(timer_id);
+  timer_delete(timer_id);  // Clean up timer
   exit(1);
 }

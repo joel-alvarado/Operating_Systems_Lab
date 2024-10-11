@@ -24,6 +24,12 @@ typedef struct sMotionSensorInfo MotionSensorInfo;
  */
 void StartIMUDriver();
 
+/**
+ * @brief Handler for SIGALRM. Will update and write current sensor data to
+ * `data.txt`.
+ *
+ * @param signum Signal number recieved
+ */
 void SaveSensorData(int signum);
 
 /**
