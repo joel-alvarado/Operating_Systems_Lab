@@ -7,9 +7,12 @@ set(CMAKE_CXX_FLAGS_RELEASE "-03 -DNDEBUG -s")
 # Set the project name
 project(cpu_sched_prio)
 
+include_directories(include)
+
 # Add the executable
 add_executable(${CMAKE_PROJECT_NAME} 
-	src/main.c)
+	src/main.c
+    src/sched_experiment.c
+)
 
-target_link_libraries(${CMAKE_PROJECT_NAME}
-    )
+target_link_libraries(${CMAKE_PROJECT_NAME})
