@@ -1,6 +1,8 @@
+#include <errno.h>
 #include <pthread.h>
 #include <sched.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/resource.h>
 #include <sys/time.h>
@@ -41,6 +43,13 @@ void* thread_func(void* arg) {
 }
 
 int main() {
+  // Fix: set rlimit to unlimited for this process
+  // NOTE: For this to work, it MUST be run as privileged user
+  struct rlimit rlim;
+  getrlimit(RLIMIT_RTPRIO, &rlim);
+  rlim.rlim_cur = RLIM_INFINITY;
+  setrlimit(RLIMIT_RTPRIO, &rlim);
+
   pthread_t t1, t2, t3, t4;
   int arg1 = 1, arg2 = 2, arg3 = 3, arg4 = 4;
 
@@ -49,39 +58,61 @@ int main() {
 
   // Thread 1
   pthread_attr_init(&attr);
-  pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
-  pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
-  param.sched_priority = 50;
-  pthread_attr_setschedparam(&attr, &param);
-  pthread_create(&t1, &attr, thread_func, &arg1);
+  if (pthread_attr_setschedpolicy(&attr, SCHED_FIFO) != 0) {
+    perror("pthread_attr_setschedpolicy");
+    exit(1);
+  }
 
-  // Thread 2
-  pthread_attr_init(&attr);
-  pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
-  pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
-  param.sched_priority = 50;
-  pthread_attr_setschedparam(&attr, &param);
-  pthread_create(&t2, &attr, thread_func, &arg2);
+  if (pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED) != 0) {
+    perror("pthread_attr_setinheritsched");
+    exit(1);
+  }
 
-  // Thread 3
-  pthread_attr_init(&attr);
-  pthread_attr_setschedpolicy(&attr, SCHED_RR);
-  pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
   param.sched_priority = 50;
-  pthread_attr_setschedparam(&attr, &param);
-  pthread_create(&t3, &attr, thread_func, &arg3);
+  if (pthread_attr_setschedparam(&attr, &param) != 0) {
+    perror("pthread_attr_setschedparam");
+    exit(1);
+  }
 
-  // Thread 4
-  pthread_attr_init(&attr);
-  pthread_attr_setschedpolicy(&attr, SCHED_RR);
-  pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
-  param.sched_priority = 50;
-  pthread_attr_setschedparam(&attr, &param);
-  pthread_create(&t4, &attr, thread_func, &arg4);
+  int res = pthread_create(&t1, &attr, thread_func, &arg1);
+  if (res != 0) {
+    const char* error_code = (res == EINVAL)   ? "EINVAL"
+                             : (res == EPERM)  ? "EPERM"
+                             : (res == EAGAIN) ? "EAGAIN"
+                                               : "UNKNOWN";
+    printf("thread create error: %s\n", error_code);
+  }
+
+  // // Thread 2
+  // pthread_attr_init(&attr);
+  // pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+  // pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
+  // param.sched_priority = 50;
+  // pthread_attr_setschedparam(&attr, &param);
+  // pthread_create(&t2, &attr, thread_func, &arg2);
+
+  // // Thread 3
+  // pthread_attr_init(&attr);
+  // pthread_attr_setschedpolicy(&attr, SCHED_RR);
+  // pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
+  // param.sched_priority = 50;
+  // pthread_attr_setschedparam(&attr, &param);
+  // pthread_create(&t3, &attr, thread_func, &arg3);
+
+  // // Thread 4
+  // pthread_attr_init(&attr);
+  // pthread_attr_setschedpolicy(&attr, SCHED_RR);
+  // pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
+  // param.sched_priority = 50;
+  // pthread_attr_setschedparam(&attr, &param);
+  // pthread_create(&t4, &attr, thread_func, &arg4);
 
   pthread_join(t1, NULL);
-  pthread_join(t2, NULL);
-  pthread_join(t3, NULL);
-  pthread_join(t4, NULL);
+  // pthread_join(t2, NULL);
+  // pthread_join(t3, NULL);
+  // pthread_join(t4, NULL);
+
+  // printf("Max %d, Min %d", sched_get_priority_max(SCHED_FIFO),
+  // sched_get_priority_min(SCHED_FIFO));
   return 0;
 }
