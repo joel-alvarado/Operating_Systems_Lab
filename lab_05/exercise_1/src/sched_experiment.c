@@ -9,12 +9,11 @@
 
 #define NUM_CHILDREN 3
 
+struct timeval parent_start;
+
 void CPUBoundTask(int id) {
   printf("Process %d started, pid: %d\n", id, getpid());
 
-  // Get start time
-  struct timeval tv_start;
-  gettimeofday(&tv_start, NULL);
   int count = 0;
   while (count < 30) {
     // CPU-bound work (infinite loop)
@@ -27,16 +26,15 @@ void CPUBoundTask(int id) {
   // Get time finished
   struct timeval tv_end;
   gettimeofday(&tv_end, NULL);
-  double elapsed_time = (tv_end.tv_sec - tv_start.tv_sec) +
-                        (tv_end.tv_usec - tv_start.tv_usec) / 1000000.0;
+  double elapsed_time = (tv_end.tv_sec - parent_start.tv_sec) +
+                        (tv_end.tv_usec - parent_start.tv_usec) / 1000000.0;
 
   printf("%d took %.6f seconds\n", id, elapsed_time);
 }
 
-int StartSchedulerExperiment() {
+int StartSchedulerExperiment(int priorities[3]) {
+  gettimeofday(&parent_start, NULL);
   pid_t pids[NUM_CHILDREN];
-  int priorities[NUM_CHILDREN] = {
-      -20, -20, -20};  // Priorities: higher value means lower priority
 
   // Create multiple CPU-bound processes with different priorities
   for (int i = 0; i < NUM_CHILDREN; i++) {
@@ -50,9 +48,6 @@ int StartSchedulerExperiment() {
       // In child process
       printf("Child %d (pid: %d) with priority %d\n", i + 1, getpid(),
              priorities[i]);
-
-      printf("The initial priority is %d\n",
-             getpriority(PRIO_PROCESS, getpid()));
 
       // Set the priority of this process
       if (setpriority(PRIO_PROCESS, getpid(), priorities[i]) < 0) {

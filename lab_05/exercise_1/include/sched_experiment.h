@@ -13,8 +13,10 @@ void CPUBoundTask(int id);
  * @brief Start the scheduler experiment main function. Will run three child
  * processes with different scheduling priorities.
  *
+ * @param int priorities[3]: The priorities of the 3 child processes
+ *
  * @return int: Exit code
  */
-int StartSchedulerExperiment();
+int StartSchedulerExperiment(int priorities[3]);
 
 #endif /* SCHED_EXPERIMENT_H */
