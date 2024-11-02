@@ -20,8 +20,8 @@ void* thread_func(void* arg) {
                            : (policy == SCHED_OTHER) ? "SCHED_OTHER"
                                                      : "UNKNOWN";
 
-  printf("Thread %lu is running with policy %s and priority %d\n",
-         pthread_self(), policy_str, param.sched_priority);
+  printf("Thread %d with ID: %lu is running with policy %s and priority %d\n",
+         num, pthread_self(), policy_str, param.sched_priority);
 
   // Time execution of thread
   struct timeval tv_start;
@@ -59,15 +59,15 @@ int main() {
   setrlimit(RLIMIT_RTPRIO, &rlim);
 
   int baseline[4] = {50, 50, 50, 50};
-  int e1[4] = {0, 0, 99, 99};
-  int e2[4] = {99, 99, 0, 0};
+  int e1[4] = {1, 1, 99, 99};
+  int e2[4] = {99, 99, 1, 1};
   int e3[4] = {90, 10, 90, 10};
   int e4[4] = {20, 20, 80, 80};
   int e5[4] = {80, 80, 20, 20};
 
   int* arr[] = {baseline, e1, e2, e3, e4, e5};
 
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 6; i++) {
     pthread_t t1, t2, t3, t4;
     int arg1 = 1, arg2 = 2, arg3 = 3, arg4 = 4;
 
