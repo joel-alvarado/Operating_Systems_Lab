@@ -38,9 +38,16 @@ void* thread_func(void* arg) {
   // Get final time of execution
   struct timeval tv_end;
   gettimeofday(&tv_end, NULL);  // Get current time
-  printf("Thread %lu finished in Seconds: %ld\nMicroseconds: %ld\n",
-         pthread_self(), tv_end.tv_sec - tv_start.tv_sec,
-         tv_end.tv_usec - tv_start.tv_usec);
+
+  long seconds = tv_end.tv_sec - tv_start.tv_sec;
+  long microseconds = tv_end.tv_usec - tv_start.tv_usec;
+  if (microseconds < 0) {
+    seconds -= 1;
+    microseconds += 1000000;
+  }
+
+  printf("Thread %lu finished in %ld seconds and %ld microseconds.\n",
+         pthread_self(), seconds, microseconds);
 }
 
 int main() {
