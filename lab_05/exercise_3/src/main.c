@@ -9,10 +9,6 @@
 #include <unistd.h>
 
 void* thread_func(void* arg) {
-  // Time execution of thread
-  struct timeval tv_start;
-  gettimeofday(&tv_start, NULL);  // Get current time
-
   int num = *(int*)arg;
 
   int policy;
@@ -26,6 +22,10 @@ void* thread_func(void* arg) {
 
   printf("Thread %lu is running with policy %s and priority %d\n",
          pthread_self(), policy_str, param.sched_priority);
+
+  // Time execution of thread
+  struct timeval tv_start;
+  gettimeofday(&tv_start, NULL);  // Get current time
 
   int i = 0;
   while (i < 200) {
