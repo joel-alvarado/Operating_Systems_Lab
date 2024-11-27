@@ -1,14 +1,22 @@
 #ifndef SAVER_H
 #define SAVER_H
 
-typedef struct MouseDelta {
-  int delta_x;
-  int delta_y;
+#include <X11/Xlib.h>
+
+typedef struct {
+  int8_t delta_x;
+  int8_t delta_y;
 } MouseDelta;
 
+typedef struct {
+  int x;
+  int y;
+} Point2D;
+
 void StartMouseSaver();
-void *WriteMouseDataRoutine(void *args);
-MouseDelta *GetMousePosition();
-MouseDelta *RelativeToAbsolutePos(MouseDelta *delta);
+void ReadWriteMouseData();
+void ScaleMouseData();
+void PrintMouseData();
+Screen *GetSystemScreen();
 
 #endif /* SAVER_H */
