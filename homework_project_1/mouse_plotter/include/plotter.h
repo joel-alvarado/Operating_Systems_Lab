@@ -6,6 +6,10 @@ typedef struct {
   int y;
 } Point2D;
 
-void StartMousePlotter();
+int StartMousePlotter();
+void *DrawRoutine(void *args);
+void LoadNextDataPoint();
+int GetFileSize(const char *fname);
+void HandlerTimerExpire(int sig);
 
 #endif /* PLOTTER_H */

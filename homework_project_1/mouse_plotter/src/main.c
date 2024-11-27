@@ -1,1 +1,3 @@
-int main() { return 0; }
+#include "plotter.h"
+
+int main() { StartMousePlotter(); }
